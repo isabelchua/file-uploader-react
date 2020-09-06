@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
-import axios from "axios";
 import Message from "./Message";
 import Progress from "./Progress";
+import axios from "axios";
 
 const FileUpload = () => {
 	const [file, setFile] = useState("");
@@ -19,29 +19,30 @@ const FileUpload = () => {
 		e.preventDefault();
 		const formData = new FormData();
 		formData.append("file", file);
-		console.log(file);
+
 		try {
 			const res = await axios.post("/upload", formData, {
 				headers: {
 					"Content-Type": "multipart/form-data"
 				},
-				onUploadProgress: ProgressEvent => {
+				onUploadProgress: progressEvent => {
 					setUploadPercentage(
 						parseInt(
 							Math.round(
-								(ProgressEvent.loaded * 100) / ProgressEvent.total
+								(progressEvent.loaded * 100) / progressEvent.total
 							)
 						)
 					);
-					//clear percentage
+
+					// Clear percentage
 					setTimeout(() => setUploadPercentage(0), 10000);
 				}
 			});
+
 			const { fileName, filePath } = res.data;
-			console.log(fileName);
-			console.log(filePath);
 
 			setUploadedFile({ fileName, filePath });
+
 			setMessage("File Uploaded");
 		} catch (err) {
 			if (err.response.status === 500) {
@@ -56,16 +57,35 @@ const FileUpload = () => {
 		<Fragment>
 			{message ? <Message msg={message} /> : null}
 			<form onSubmit={onSubmit}>
-				<input type="file" id="custom" onChange={onChange} />
-				<label htmlFor="custom">{filename}</label>
+				<div className="custom-file mb-4">
+					<input
+						type="file"
+						className="custom-file-input"
+						id="customFile"
+						onChange={onChange}
+					/>
+					<label className="custom-file-label" htmlFor="customFile">
+						{filename}
+					</label>
+				</div>
+
 				<Progress percentage={uploadPercentage} />
-				<input type="submit" />
+
+				<input
+					type="submit"
+					value="Upload"
+					className="btn btn-primary btn-block mt-4"
+				/>
 			</form>
 			{uploadedFile ? (
-				<div>
-					<div>
-						<h3>{uploadedFile.fileName}</h3>
-						<img src={uploadedFile.filePath} alt="pic" />
+				<div className="row mt-5">
+					<div className="col-md-6 m-auto">
+						<h3 className="text-center">{uploadedFile.fileName}</h3>
+						<img
+							style={{ width: "100%" }}
+							src={uploadedFile.filePath}
+							alt=""
+						/>
 					</div>
 				</div>
 			) : null}
